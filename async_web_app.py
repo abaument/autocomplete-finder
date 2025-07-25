@@ -9,6 +9,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi import Request
 
 from scraper_utils import extract_sirens_from_csv, scrape_sirens, FIELDNAMES
+from supabase_utils import insert_records
 
 
 templates = Jinja2Templates(directory="templates")
@@ -35,6 +36,8 @@ def scrape_and_save(job_id: str, csv_path: Path, sleep: float = 0.5, threads: in
             writer.writeheader()
             for row in results:
                 writer.writerow(row)
+        # Save scraped data to Supabase if credentials are provided
+        insert_records(results)
         jobs[job_id]["status"] = "completed"
         jobs[job_id]["result"] = str(output_path)
     except Exception as e:
